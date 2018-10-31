@@ -13,10 +13,13 @@ class MyServo{
     int minimum;
     int maximum;
     int pos;
+    int servoPin;
     Servo servo;
     
   public:
     MyServo(int _servoPin, int _minimum, int _maximum, int _pos);
+
+    void init();
   
     void moveBy(int value);
   

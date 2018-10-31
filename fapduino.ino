@@ -27,13 +27,13 @@ SoftwareSerial bluetooth(SP2_RX, SP2_TX); // 2 is RX, 3 is TX
 #define servoRightHigh 160
 
 #define servoGripPosition 95
-#define servoGripLow 90
-#define servoGripHigh 100
+#define servoGripLow 0
+#define servoGripHigh 180
 
 MyServo servoBase(servoBasePin, servoBaseLow, servoBaseHigh, servoBasePosition);
-//MyServo servoLeft(servoLeftPin, servoLeftLow, servoLeftHigh, servoLeftPosition);
-//MyServo servoRight(servoRightPin, servoRightLow, servoRightHigh, servoRightPosition);
-//MyServo servoGrip(servoGripPin, servoGripLow, servoGripHigh, servoGripPosition);
+MyServo servoLeft(servoLeftPin, servoLeftLow, servoLeftHigh, servoLeftPosition);
+MyServo servoRight(servoRightPin, servoRightLow, servoRightHigh, servoRightPosition);
+MyServo servoGrip(servoGripPin, servoGripLow, servoGripHigh, servoGripPosition);
 
 // controls
 // 6 axes shit
@@ -51,17 +51,20 @@ int analogSW = 1;
 #define rotaryDT 11
 #define rotarySW 10
 
-volatile unsigned int rotaryPos = 0;
+// volatile unsigned int rotaryPos = 0;
 
-
-int pos = 0;    // variable to store the servo position
-char cmd = 0;
+int cmd =  0;
 
 void setup() {
   // BT module
   bluetooth.begin(9600); // Default communication rate of the Bluetooth module
 
+  
   // servos
+  servoBase.init();
+  servoLeft.init();
+  servoRight.init();
+  servoGrip.init();
 
   // analog controls
   
@@ -75,8 +78,10 @@ void setup() {
 //  digitalWrite(rotaryDT, HIGH);       // turn on pullup resistor
 //  attachInterrupt(0, doEncoder, RISING); // encoder pin on interrupt 0 - pin2
   
-  Serial.begin(115200);
+  Serial.begin(57600);
 }
+
+
 
 void loop() {    
   //handle bluetooth
@@ -87,10 +92,10 @@ void loop() {
 
 
    //show sweep 
-   servoBase.sweep();
-   //servoLeft.sweep();
-   //servoRight.sweep();
-   //servoGrip.sweep();
+   // servoBase.sweep();
+   // servoLeft.sweep();
+   // servoRight.sweep();
+   // servoGrip.sweep();
 
 
   // handle analog
@@ -99,24 +104,23 @@ void loop() {
   analogY = treatAnalogInputValue(analogRead(analogYPin));
   analogSW = treatAnalogInputValue(analogRead(analogSWPin)); 
   
-  Serial.print("Switch:  ");
-  Serial.print(analogSW);
-  Serial.print("\n");
-  Serial.print("X-axis: ");
-  Serial.print(analogX);
-  Serial.print("\n");
-  Serial.print("Y-axis: ");
-  Serial.println(analogY);
-  Serial.print("\n\n");
+//  Serial.print("Switch:  ");
+//  Serial.print(analogSW);
+//  Serial.print("\n");
+//  Serial.print("X-axis: ");
+//  Serial.print(analogX);
+//  Serial.print("\n");
+//  Serial.print("Y-axis: ");
+//  Serial.println(analogY);
+//  Serial.print("\n\n");
 
 
   if(analogX-4 != 0){
-    Serial.println("Servo: ");
     servoBase.moveBy(analogX-4);
   }
 
   if(analogY-4 != 0){
-    //servoRight.moveBy(analogY-4);   
+    servoGrip.moveBy(analogY-4);   
   }
 
 //  // handleRotary
@@ -126,16 +130,15 @@ void loop() {
   delay(60);
 }
 
-void doEncoder() {
-  if (digitalRead(rotaryDT)==HIGH) {
-    rotaryPos++;
-  } else {
-    rotaryPos--;
-  }
-}
+//void doEncoder() {
+//  if (digitalRead(rotaryDT)==HIGH) {
+//    rotaryPos++;
+//  } else {
+//    rotaryPos--;
+//  }
+//}
 
 void handleCommand(char command){
-  Serial.println(command);
   switch(command){
     case 'l':
       servoBase.moveBy(5);
@@ -144,17 +147,23 @@ void handleCommand(char command){
       servoBase.moveBy(-5);
       break;
     case 'f':
-      //servoRight.moveBy(5);
+      servoRight.moveBy(5);
       break;
     case 'b':
-      //servoRight.moveBy(-5);
+      servoRight.moveBy(-5);
       break;
     case 'u':
-      //servoLeft.moveBy(5);
+      servoLeft.moveBy(5);
       break;
     case 'd':
-      //servoLeft.moveBy(-5);
+      servoLeft.moveBy(-5);
       break;
+    case 'o':
+      servoLeft.moveBy(5);
+      break;
+    case 'c':
+      servoLeft.moveBy(-5);
+    break;
     default:
       Serial.println("Not move!");
   }  
