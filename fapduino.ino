@@ -62,12 +62,13 @@ int analog2X = 4;
 int analog2Y = 4;
 int analog2SW = 1;
 
-int cmd =  0;
+int cmd = 0;
 
-void setup() {
+void setup()
+{
   // BT module
   bluetooth.begin(9600); // Default communication rate of the Bluetooth module
-  
+
   // servos
   servoBase.init();
   servoLeft.init();
@@ -76,117 +77,125 @@ void setup() {
   servoGripRotate.init();
 
   // analog controls
-  
+
   pinMode(analog1SW, INPUT);
   digitalWrite(analog1SW, HIGH);
 
   pinMode(analog2SW, INPUT);
   digitalWrite(analog2SW, HIGH);
 
-  
   Serial.begin(57600);
 }
 
-void loop() {    
+void loop()
+{
   //handle bluetooth
-  if(bluetooth.available() > 0){ // Checks whether data is comming from the serial port
+  if (bluetooth.available() > 0)
+  {                         // Checks whether data is comming from the serial port
     cmd = bluetooth.read(); // Reads the data from the serial port
     handleCommand(cmd);
   }
 
-
-   //show sweep 
-   // servoBase.sweep();
-   // servoLeft.sweep();
-   // servoRight.sweep();
-   // servoGrip.sweep();
-   // servoGripRotate.sweep();
-
+  //show sweep
+  // servoBase.sweep();
+  // servoLeft.sweep();
+  // servoRight.sweep();
+  // servoGrip.sweep();
+  // servoGripRotate.sweep();
 
   // handle analog
-   
+
   analog1X = treatAnalogInputValue(analogRead(analog1XPin));
   analog1Y = treatAnalogInputValue(analogRead(analog1YPin));
-  analog1SW = treatAnalogInputValue(analogRead(analog1SWPin)); 
+  analog1SW = treatAnalogInputValue(analogRead(analog1SWPin));
 
   analog2X = treatAnalogInputValue(analogRead(analog2XPin));
   analog2Y = treatAnalogInputValue(analogRead(analog2YPin));
-  analog2SW = treatAnalogInputValue(analogRead(analog2SWPin)); 
-  
-//  Serial.print("Switch:  ");
-//  Serial.print(analogSW);
-//  Serial.print("\n");
-//  Serial.print("X-axis: ");
-//  Serial.print(analogX);
-//  Serial.print("\n");
-//  Serial.print("Y-axis: ");
-//  Serial.println(analogY);
-//  Serial.print("\n\n");
+  analog2SW = treatAnalogInputValue(analogRead(analog2SWPin));
 
+  //  Serial.print("Switch:  ");
+  //  Serial.print(analogSW);
+  //  Serial.print("\n");
+  //  Serial.print("X-axis: ");
+  //  Serial.print(analogX);
+  //  Serial.print("\n");
+  //  Serial.print("Y-axis: ");
+  //  Serial.println(analogY);
+  //  Serial.print("\n\n");
 
-  if(analog1X != 0){
+  if (analog1X != 0)
+  {
     servoBase.moveBy(analog1X);
   }
 
-  if(analog1Y != 0){
+  if (analog1Y != 0)
+  {
     servoLeft.moveBy(analog1Y);
   }
 
-  if(analog2X != 0){
+  if (analog2X != 0)
+  {
     servoGripRotate.moveBy(analog2X);
   }
 
-  if(analog2Y != 0){
+  if (analog2Y != 0)
+  {
     servoRight.moveBy(analog2Y);
   }
 
   // grip
-  if(analog2SWPin == 1){
+  if (analog2SWPin == 1)
+  {
     servoGrip.moveTo(20);
-  }else{
+  }
+  else
+  {
     servoGrip.moveTo(160);
   }
 
-   delay(60);
+  delay(60);
 }
 
-void handleCommand(char command){
-  switch(command){
-    case 'l':
-      servoBase.moveBy(5);
-      break;
-    case 'r':
-      servoBase.moveBy(-5);
-      break;
-    case 'f':
-      servoRight.moveBy(5);
-      break;
-    case 'b':
-      servoRight.moveBy(-5);
-      break;
-    case 'u':
-      servoLeft.moveBy(5);
-      break;
-    case 'd':
-      servoLeft.moveBy(-5);
-      break;
-    case 'o':
-      servoGrip.moveBy(5);
-      break;
-    case 'c':
-      servoGrip.moveBy(-5);
+void handleCommand(char command)
+{
+  switch (command)
+  {
+  case 'l':
+    servoBase.moveBy(5);
     break;
-    case 'q':
-      servoGripRotate.moveBy(5);
-      break;
-    case 'e':
-      servoGripRotate.moveBy(-5);
+  case 'r':
+    servoBase.moveBy(-5);
     break;
-    default:
-      Serial.println("Not move!");
-  }  
+  case 'f':
+    servoRight.moveBy(5);
+    break;
+  case 'b':
+    servoRight.moveBy(-5);
+    break;
+  case 'u':
+    servoLeft.moveBy(5);
+    break;
+  case 'd':
+    servoLeft.moveBy(-5);
+    break;
+  case 'o':
+    servoGrip.moveBy(5);
+    break;
+  case 'c':
+    servoGrip.moveBy(-5);
+    break;
+  case 'q':
+    servoGripRotate.moveBy(5);
+    break;
+  case 'e':
+    servoGripRotate.moveBy(-5);
+    break;
+  default:
+    Serial.println("Not move!");
+  }
 }
 
-int treatAnalogInputValue(int data) {
-  return (data * 9 / 1024)-4;
+int treatAnalogInputValue(int data)
+{
+  return (data * 9 / 1024) - 4;
 }
