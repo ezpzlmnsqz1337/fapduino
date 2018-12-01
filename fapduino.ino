@@ -1,3 +1,5 @@
+#include <dht.h>
+
 /**
  * Controling of the robotic eezybot arm via bluetooth
  */
@@ -13,6 +15,7 @@ SoftwareSerial bluetooth(SP2_RX, SP2_TX); // 2 is RX, 3 is TX
 #define servoLeftPin 7
 #define servoRightPin 8
 #define servoGripPin 9
+#define servoGripRotatePin 10
 
 #define servoBasePosition 90
 #define servoBaseLow 0
@@ -20,7 +23,7 @@ SoftwareSerial bluetooth(SP2_RX, SP2_TX); // 2 is RX, 3 is TX
 
 #define servoLeftPosition 30
 #define servoLeftLow 20
-#define servoLeftHigh 80
+#define servoLeftHigh 100
 
 #define servoRightPosition 100
 #define servoRightLow 90
@@ -30,58 +33,59 @@ SoftwareSerial bluetooth(SP2_RX, SP2_TX); // 2 is RX, 3 is TX
 #define servoGripLow 0
 #define servoGripHigh 180
 
+#define servoGripRotatePosition 90
+#define servoGripRotateLow 0
+#define servoGripRotateHigh 180
+
 MyServo servoBase(servoBasePin, servoBaseLow, servoBaseHigh, servoBasePosition);
 MyServo servoLeft(servoLeftPin, servoLeftLow, servoLeftHigh, servoLeftPosition);
 MyServo servoRight(servoRightPin, servoRightLow, servoRightHigh, servoRightPosition);
 MyServo servoGrip(servoGripPin, servoGripLow, servoGripHigh, servoGripPosition);
+MyServo servoGripRotate(servoGripRotatePin, servoGripRotateLow, servoGripRotateHigh, servoGripRotatePosition);
 
 // controls
 // 6 axes shit
-#define analogXPin 0
-#define analogYPin 1
-#define analogSWPin 2
 
-int analogX = 4;
-int analogY = 4;
-int analogSW = 1;
+#define analog1YPin 0
+#define analog1XPin 1
+#define analog1SWPin 4
 
+#define analog2YPin 2
+#define analog2XPin 3
+#define analog2SWPin 5
 
-//rotary encoder
-#define rotaryCLK 9
-#define rotaryDT 11
-#define rotarySW 10
+int analog1X = 4;
+int analog1Y = 4;
+int analog1SW = 1;
 
-// volatile unsigned int rotaryPos = 0;
+int analog2X = 4;
+int analog2Y = 4;
+int analog2SW = 1;
 
 int cmd =  0;
 
 void setup() {
   // BT module
   bluetooth.begin(9600); // Default communication rate of the Bluetooth module
-
   
   // servos
   servoBase.init();
   servoLeft.init();
   servoRight.init();
   servoGrip.init();
+  servoGripRotate.init();
 
   // analog controls
   
-  pinMode(analogSW, INPUT);
-  digitalWrite(analogSW, HIGH);
+  pinMode(analog1SW, INPUT);
+  digitalWrite(analog1SW, HIGH);
 
-//  //rotary
-//  pinMode(rotaryCLK, INPUT); 
-//  digitalWrite(rotaryCLK, HIGH);       // turn on pullup resistor
-//  pinMode(rotaryDT, INPUT); 
-//  digitalWrite(rotaryDT, HIGH);       // turn on pullup resistor
-//  attachInterrupt(0, doEncoder, RISING); // encoder pin on interrupt 0 - pin2
+  pinMode(analog2SW, INPUT);
+  digitalWrite(analog2SW, HIGH);
+
   
   Serial.begin(57600);
 }
-
-
 
 void loop() {    
   //handle bluetooth
@@ -96,13 +100,18 @@ void loop() {
    // servoLeft.sweep();
    // servoRight.sweep();
    // servoGrip.sweep();
+   // servoGripRotate.sweep();
 
 
   // handle analog
    
-  analogX = treatAnalogInputValue(analogRead(analogXPin));
-  analogY = treatAnalogInputValue(analogRead(analogYPin));
-  analogSW = treatAnalogInputValue(analogRead(analogSWPin)); 
+  analog1X = treatAnalogInputValue(analogRead(analog1XPin));
+  analog1Y = treatAnalogInputValue(analogRead(analog1YPin));
+  analog1SW = treatAnalogInputValue(analogRead(analog1SWPin)); 
+
+  analog2X = treatAnalogInputValue(analogRead(analog2XPin));
+  analog2Y = treatAnalogInputValue(analogRead(analog2YPin));
+  analog2SW = treatAnalogInputValue(analogRead(analog2SWPin)); 
   
 //  Serial.print("Switch:  ");
 //  Serial.print(analogSW);
@@ -115,28 +124,31 @@ void loop() {
 //  Serial.print("\n\n");
 
 
-  if(analogX-4 != 0){
-    servoBase.moveBy(analogX-4);
+  if(analog1X != 0){
+    servoBase.moveBy(analog1X);
   }
 
-  if(analogY-4 != 0){
-    servoGrip.moveBy(analogY-4);   
+  if(analog1Y != 0){
+    servoLeft.moveBy(analog1Y);
   }
 
-//  // handleRotary
-//  Serial.print("Position:");
-//  Serial.println (rotaryPos, DEC);  //Angle = (360 / Encoder_Resolution) * rotaryPos
+  if(analog2X != 0){
+    servoGripRotate.moveBy(analog2X);
+  }
 
-  delay(60);
+  if(analog2Y != 0){
+    servoRight.moveBy(analog2Y);
+  }
+
+  // grip
+  if(analog2SWPin == 1){
+    servoGrip.moveTo(20);
+  }else{
+    servoGrip.moveTo(160);
+  }
+
+   delay(60);
 }
-
-//void doEncoder() {
-//  if (digitalRead(rotaryDT)==HIGH) {
-//    rotaryPos++;
-//  } else {
-//    rotaryPos--;
-//  }
-//}
 
 void handleCommand(char command){
   switch(command){
@@ -159,10 +171,16 @@ void handleCommand(char command){
       servoLeft.moveBy(-5);
       break;
     case 'o':
-      servoLeft.moveBy(5);
+      servoGrip.moveBy(5);
       break;
     case 'c':
-      servoLeft.moveBy(-5);
+      servoGrip.moveBy(-5);
+    break;
+    case 'q':
+      servoGripRotate.moveBy(5);
+      break;
+    case 'e':
+      servoGripRotate.moveBy(-5);
     break;
     default:
       Serial.println("Not move!");
@@ -170,5 +188,5 @@ void handleCommand(char command){
 }
 
 int treatAnalogInputValue(int data) {
-  return (data * 9 / 1024);
+  return (data * 9 / 1024)-4;
 }

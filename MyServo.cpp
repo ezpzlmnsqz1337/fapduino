@@ -22,6 +22,11 @@ void MyServo::moveBy(int value){
   this->pos = newValue;
 }
 
+void MyServo::moveTo(int value){
+  servo.write(value);
+  this->pos = value;
+}
+
 void MyServo::sweep(){
   for (this->pos = minimum; this->pos <= this->maximum; this->pos += 1) { // goes from 0 degrees to 180 degrees
     // in steps of 1 degree

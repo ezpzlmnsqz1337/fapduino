@@ -22,6 +22,8 @@ class MyServo{
     void init();
   
     void moveBy(int value);
+
+    void moveTo(int value);
   
     void sweep();
 };
