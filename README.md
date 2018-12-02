@@ -4,12 +4,12 @@ EEZYbotARM MK2 controlled via bluetooth or analog stick
 stick 1
  - X axis: rotate left and right
  - Y axis: move forward and backward
- - click: save position
+ - click: save position - TBD
 
 stick 2
  - X axis: rotate claw left or right
  - Y axis: move up and down
- - click: toggle claw open/closed
+ - click: toggle claw open/closed - TBD
 
  ## Wiring
  
