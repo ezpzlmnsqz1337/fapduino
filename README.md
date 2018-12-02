@@ -11,5 +11,9 @@ stick 2
  - Y axis: move up and down
  - click: toggle claw open/closed
 
+ ## Wiring
+ 
+![alt text](https://github.com/ezpzlmnsqz1337/fapduino/blob/master/schematics/fapduino_wiring_bb.png)
+
 #Thingiverse:
 https://www.thingiverse.com/thing:1454048
