@@ -144,7 +144,7 @@ void loop()
   }
 
   // grip
-  if (analog2SWPin == 1)
+  if (analog2SWPin == HIGH)
   {
     servoGrip.moveTo(20);
   }

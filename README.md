@@ -18,7 +18,7 @@ stick 1
 stick 2
  - X axis: rotate claw left or right
  - Y axis: move up and down
- - click: toggle claw open/closed - TBD
+ - click: toggle claw open/closed
 
  ## Wiring
  
