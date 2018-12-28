@@ -1,4 +1,4 @@
-#include <dht.h>
+// #include <dht.h>
 
 /**
  * Controling of the robotic eezybot arm via bluetooth
@@ -61,6 +61,7 @@ int analog1SW = 1;
 int analog2X = 4;
 int analog2Y = 4;
 int analog2SW = 1;
+int analog2SWflag = 0;
 
 int cmd = 0;
 
@@ -78,11 +79,11 @@ void setup()
 
   // analog controls
 
-  pinMode(analog1SW, INPUT);
-  digitalWrite(analog1SW, HIGH);
+  pinMode(analog1SWPin, INPUT);
+  digitalWrite(analog1SWPin, HIGH);
 
-  pinMode(analog2SW, INPUT);
-  digitalWrite(analog2SW, HIGH);
+  pinMode(analog2SWPin, INPUT);
+  digitalWrite(analog2SWPin, HIGH);
 
   Serial.begin(57600);
 }
@@ -107,15 +108,15 @@ void loop()
 
   analog1X = treatAnalogInputValue(analogRead(analog1XPin));
   analog1Y = treatAnalogInputValue(analogRead(analog1YPin));
-  analog1SW = treatAnalogInputValue(analogRead(analog1SWPin));
+  analog1SW = digitalRead(analog1SWPin);
 
   analog2X = treatAnalogInputValue(analogRead(analog2XPin));
   analog2Y = treatAnalogInputValue(analogRead(analog2YPin));
-  analog2SW = treatAnalogInputValue(analogRead(analog2SWPin));
+  analog2SW = digitalRead(analog2SWPin);
 
-  //  Serial.print("Switch:  ");
-  //  Serial.print(analogSW);
-  //  Serial.print("\n");
+  Serial.print("Switch:  ");
+  Serial.print(analog2SW);
+  Serial.print("\n");
   //  Serial.print("X-axis: ");
   //  Serial.print(analogX);
   //  Serial.print("\n");
@@ -144,58 +145,65 @@ void loop()
   }
 
   // grip
-  if (analog2SWPin == HIGH)
+  //If button pressed...
+  if (analog2SW == LOW)
   {
-    servoGrip.moveTo(20);
-  }
-  else
-  {
-    servoGrip.moveTo(160);
+    //...ones, turn led on!
+    if (analog2SWflag == 0)
+    {
+      servoGrip.moveTo(60);
+      analog2SWflag = 1; //change flag variable
+    }
+    //...twice, turn led off!
+    else if (analog2SWflag == 1)
+    {
+      servoGrip.moveTo(160);
+      analog2SWflag = 0; //change flag variable again
+    }
+
+    delay(60);
   }
 
-  delay(60);
-}
-
-void handleCommand(char command)
-{
-  switch (command)
+  void handleCommand(char command)
   {
-  case 'l':
-    servoBase.moveBy(5);
-    break;
-  case 'r':
-    servoBase.moveBy(-5);
-    break;
-  case 'f':
-    servoRight.moveBy(5);
-    break;
-  case 'b':
-    servoRight.moveBy(-5);
-    break;
-  case 'u':
-    servoLeft.moveBy(5);
-    break;
-  case 'd':
-    servoLeft.moveBy(-5);
-    break;
-  case 'o':
-    servoGrip.moveBy(5);
-    break;
-  case 'c':
-    servoGrip.moveBy(-5);
-    break;
-  case 'q':
-    servoGripRotate.moveBy(5);
-    break;
-  case 'e':
-    servoGripRotate.moveBy(-5);
-    break;
-  default:
-    Serial.println("Not move!");
+    switch (command)
+    {
+    case 'l':
+      servoBase.moveBy(5);
+      break;
+    case 'r':
+      servoBase.moveBy(-5);
+      break;
+    case 'f':
+      servoRight.moveBy(5);
+      break;
+    case 'b':
+      servoRight.moveBy(-5);
+      break;
+    case 'u':
+      servoLeft.moveBy(5);
+      break;
+    case 'd':
+      servoLeft.moveBy(-5);
+      break;
+    case 'o':
+      servoGrip.moveBy(5);
+      break;
+    case 'c':
+      servoGrip.moveBy(-5);
+      break;
+    case 'q':
+      servoGripRotate.moveBy(5);
+      break;
+    case 'e':
+      servoGripRotate.moveBy(-5);
+      break;
+    default:
+      Serial.println("Not move!");
+    }
   }
-}
 
-int treatAnalogInputValue(int data)
-{
-  return (data * 9 / 1024) - 4;
-}
+  int treatAnalogInputValue(int data)
+  {
+    return map(data, 0, 1024, -4, 4);
+  }
