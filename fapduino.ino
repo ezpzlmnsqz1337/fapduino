@@ -106,12 +106,12 @@ void loop()
 
   // handle analog
 
-  analog1X = treatAnalogInputValue(analogRead(analog1XPin));
-  analog1Y = treatAnalogInputValue(analogRead(analog1YPin));
+  analog1X = treatAnalogInputValue(analogRead(analog1XPin), 4);
+  analog1Y = treatAnalogInputValue(analogRead(analog1YPin), 4);
   analog1SW = digitalRead(analog1SWPin);
 
-  analog2X = treatAnalogInputValue(analogRead(analog2XPin));
-  analog2Y = treatAnalogInputValue(analogRead(analog2YPin));
+  analog2X = treatAnalogInputValue(analogRead(analog2XPin), 12);
+  analog2Y = treatAnalogInputValue(analogRead(analog2YPin), 4);
   analog2SW = digitalRead(analog2SWPin);
 
   Serial.print("Switch:  ");
@@ -160,50 +160,51 @@ void loop()
       servoGrip.moveTo(160);
       analog2SWflag = 0; //change flag variable again
     }
-
-    delay(60);
   }
 
-  void handleCommand(char command)
+  delay(60);
+}
+
+void handleCommand(char command)
+{
+  switch (command)
   {
-    switch (command)
-    {
-    case 'l':
-      servoBase.moveBy(5);
-      break;
-    case 'r':
-      servoBase.moveBy(-5);
-      break;
-    case 'f':
-      servoRight.moveBy(5);
-      break;
-    case 'b':
-      servoRight.moveBy(-5);
-      break;
-    case 'u':
-      servoLeft.moveBy(5);
-      break;
-    case 'd':
-      servoLeft.moveBy(-5);
-      break;
-    case 'o':
-      servoGrip.moveBy(5);
-      break;
-    case 'c':
-      servoGrip.moveBy(-5);
-      break;
-    case 'q':
-      servoGripRotate.moveBy(5);
-      break;
-    case 'e':
-      servoGripRotate.moveBy(-5);
-      break;
-    default:
-      Serial.println("Not move!");
-    }
+  case 'l':
+    servoBase.moveBy(5);
+    break;
+  case 'r':
+    servoBase.moveBy(-5);
+    break;
+  case 'f':
+    servoRight.moveBy(5);
+    break;
+  case 'b':
+    servoRight.moveBy(-5);
+    break;
+  case 'u':
+    servoLeft.moveBy(5);
+    break;
+  case 'd':
+    servoLeft.moveBy(-5);
+    break;
+  case 'o':
+    servoGrip.moveBy(5);
+    break;
+  case 'c':
+    servoGrip.moveBy(-5);
+    break;
+  case 'q':
+    servoGripRotate.moveBy(5);
+    break;
+  case 'e':
+    servoGripRotate.moveBy(-5);
+    break;
+  default:
+    Serial.println("Not move!");
   }
+}
 
-  int treatAnalogInputValue(int data)
-  {
-    return map(data, 0, 1024, -4, 4);
-  }
+int treatAnalogInputValue(int data, int speed)
+{
+  return map(data, 0, 1024, -speed, speed);
+}
