@@ -12,6 +12,8 @@ private:
   int gripRotate;
 
 public:
+  Position();
+
   Position(int _base, int _left, int _right, int _grip, int _gripRotate);
 
   int getBase();

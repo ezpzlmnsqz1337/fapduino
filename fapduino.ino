@@ -5,14 +5,9 @@
 #include "Position.h"
 #include <SoftwareSerial.h>
 
-#define MAX_SAVED_POSITIONS 5
+#define MAX_SAVED_POSITIONS 20
 
-Position positions[MAX_SAVED_POSITIONS] = {
-    Position(0, 0, 0, 0, 0),
-    Position(0, 0, 0, 0, 0),
-    Position(0, 0, 0, 0, 0),
-    Position(0, 0, 0, 0, 0),
-    Position(0, 0, 0, 0, 0)};
+Position positions[MAX_SAVED_POSITIONS];
 
 #define SP2_RX 2
 #define SP2_TX 3
@@ -65,6 +60,7 @@ MyServo servoGripRotate(servoGripRotatePin, servoGripRotateLow, servoGripRotateH
 int analog1X = 4;
 int analog1Y = 4;
 int analog1SW = 1;
+int analog1SWflag = 0;
 
 int analog2X = 4;
 int analog2Y = 4;
@@ -110,17 +106,12 @@ void loop()
   {
     Serial.write("Yes");    // Checks whether data is comming from the serial port
     cmd = bluetooth.read(); // Reads the data from the serial port
-    handleCommand(cmd);
+    handleBluetoothCommand(cmd);
   }
+
   if (!playing)
   {
-
-    //show sweep
-    // servoBase.sweep();
-    // servoLeft.sweep();
-    // servoRight.sweep();
-    // servoGrip.sweep();
-    // servoGripRotate.sweep();
+    // normal workflow
 
     // handle analog
 
@@ -152,12 +143,27 @@ void loop()
       servoRight.moveBy(analog2Y);
     }
 
+    // save position
+    if (analog1SW == LOW)
+    {
+      if (analog1SWflag == 0)
+      {
+        savePosition();
+        analog1SWflag = 1;
+      }
+      else if (analog1SWflag == 1)
+      {
+        savePosition();
+        analog1SWflag = 0;
+      }
+    }
+
     // grip
     if (analog2SW == LOW)
     {
       if (analog2SWflag == 0)
       {
-        servoGrip.moveTo(60);
+        servoGrip.moveTo(50);
         analog2SWflag = 1;
       }
       else if (analog2SWflag == 1)
@@ -169,9 +175,13 @@ void loop()
 
     delay(60);
   }
+  else
+  {
+    play();
+  }
 }
 
-void handleCommand(char command)
+void handleBluetoothCommand(char command)
 {
   Serial.write("BT command: ");
   Serial.write(command);
@@ -232,6 +242,10 @@ int treatAnalogInputValue(int data, int speed)
 
 void savePosition()
 {
+  if (savedPositions == MAX_SAVED_POSITIONS)
+  {
+    clearPositions();
+  }
   positions[savedPositions] = Position(servoBase.getPosition(),
                                        servoLeft.getPosition(),
                                        servoRight.getPosition(),

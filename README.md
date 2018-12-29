@@ -20,6 +20,21 @@ stick 2
  - Y axis: move up and down
  - click: toggle claw open/closed
 
+ ## Bluetooth
+ - l: rotate base left    
+ - r: rotate base right    
+ - f: move arm forward    
+ - b: move arm backward    
+ - u: move arm up    
+ - d: move arm down    
+ - o: open claw
+ - c: close claw    
+ - q: rotate claw left    
+ - e: rotate claw right    
+ - p: play saved positions    
+ - s: save position of the servos, so it can then be played in a sequence    
+ - i: stop playing sequence    
+
  ## Wiring
  
 ![alt text](https://github.com/ezpzlmnsqz1337/fapduino/blob/master/schematics/fapduino_wiring_bb.png)

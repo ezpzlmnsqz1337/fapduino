@@ -32,13 +32,14 @@ void MyServo::moveBy(int value)
 
 void MyServo::moveTo(int value)
 {
-  servo.write(value);
-  this->pos = value;
+  int newValue = constrain(value, this->minimum, this->maximum);
+  servo.write(newValue);
+  this->pos = newValue;
 }
 
 void MyServo::sweep()
 {
-  for (this->pos = minimum; this->pos <= this->maximum; this->pos += 1)
+  for (this->pos = this->minimum; this->pos <= this->maximum; this->pos += 1)
   { // goes from 0 degrees to 180 degrees
     // in steps of 1 degree
     servo.write(this->pos); // tell servo to go to position in variable 'pos'

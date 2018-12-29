@@ -7,6 +7,15 @@
 #include "pins_arduino.h"
 #include "WConstants.h"
 #endif
+Position::Position()
+{
+  this->base = 0;
+  this->left = 0;
+  this->right = 0;
+  this->grip = 0;
+  this->gripRotate = 0;
+}
+
 Position::Position(int _base, int _left, int _right, int _grip, int _gripRotate)
     : base(_base), left(_left), right(_right), grip(_grip), gripRotate(_gripRotate)
 {
