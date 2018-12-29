@@ -61,11 +61,13 @@ int analog1X = 4;
 int analog1Y = 4;
 int analog1SW = 1;
 int analog1SWflag = 0;
+int analog1SWlastValue = 1;
 
 int analog2X = 4;
 int analog2Y = 4;
 int analog2SW = 1;
 int analog2SWflag = 0;
+int analog2SWlastValue = 1;
 
 int cmd = 0;
 
@@ -146,31 +148,47 @@ void loop()
     // save position
     if (analog1SW == LOW)
     {
-      if (analog1SWflag == 0)
+      if (analog1SWlastValue == 1)
       {
-        savePosition();
-        analog1SWflag = 1;
+        analog1SWlastValue = 0;
+        if (analog1SWflag == 0)
+        {
+          savePosition();
+          analog1SWflag = 1;
+        }
+        else if (analog1SWflag == 1)
+        {
+          savePosition();
+          analog1SWflag = 0;
+        }
       }
-      else if (analog1SWflag == 1)
-      {
-        savePosition();
-        analog1SWflag = 0;
-      }
+    }
+    else
+    {
+      analog1SWlastValue = 1;
     }
 
     // grip
     if (analog2SW == LOW)
     {
-      if (analog2SWflag == 0)
+      if (analog2SWlastValue == 1)
       {
-        servoGrip.moveTo(50);
-        analog2SWflag = 1;
+        analog2SWlastValue = 0;
+        if (analog2SWflag == 0)
+        {
+          servoGrip.moveTo(50);
+          analog2SWflag = 1;
+        }
+        else if (analog2SWflag == 1)
+        {
+          servoGrip.moveTo(160);
+          analog2SWflag = 0;
+        }
       }
-      else if (analog2SWflag == 1)
-      {
-        servoGrip.moveTo(160);
-        analog2SWflag = 0;
-      }
+    }
+    else
+    {
+      analog2SWlastValue = 1;
     }
 
     delay(60);
