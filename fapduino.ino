@@ -104,98 +104,29 @@ void setup()
 void loop()
 {
   //handle bluetooth
-  if (bluetooth.available() > 0)
-  {
-    Serial.write("Yes");    // Checks whether data is comming from the serial port
-    cmd = bluetooth.read(); // Reads the data from the serial port
-    handleBluetoothCommand(cmd);
-  }
+  handleBluetooth();
 
   if (!playing)
   {
     // normal workflow
 
     // handle analog
-
-    analog1X = treatAnalogInputValue(analogRead(analog1XPin), 4);
-    analog1Y = treatAnalogInputValue(analogRead(analog1YPin), 4);
-    analog1SW = digitalRead(analog1SWPin);
-
-    analog2X = treatAnalogInputValue(analogRead(analog2XPin), 12);
-    analog2Y = treatAnalogInputValue(analogRead(analog2YPin), 4);
-    analog2SW = digitalRead(analog2SWPin);
-
-    if (analog1X != 0)
-    {
-      servoBase.moveBy(analog1X);
-    }
-
-    if (analog1Y != 0)
-    {
-      servoLeft.moveBy(analog1Y);
-    }
-
-    if (analog2X != 0)
-    {
-      servoGripRotate.moveBy(analog2X);
-    }
-
-    if (analog2Y != 0)
-    {
-      servoRight.moveBy(analog2Y);
-    }
-
-    // save position
-    if (analog1SW == LOW)
-    {
-      if (analog1SWlastValue == 1)
-      {
-        analog1SWlastValue = 0;
-        if (analog1SWflag == 0)
-        {
-          savePosition();
-          analog1SWflag = 1;
-        }
-        else if (analog1SWflag == 1)
-        {
-          savePosition();
-          analog1SWflag = 0;
-        }
-      }
-    }
-    else
-    {
-      analog1SWlastValue = 1;
-    }
-
-    // grip
-    if (analog2SW == LOW)
-    {
-      if (analog2SWlastValue == 1)
-      {
-        analog2SWlastValue = 0;
-        if (analog2SWflag == 0)
-        {
-          servoGrip.moveTo(50);
-          analog2SWflag = 1;
-        }
-        else if (analog2SWflag == 1)
-        {
-          servoGrip.moveTo(160);
-          analog2SWflag = 0;
-        }
-      }
-    }
-    else
-    {
-      analog2SWlastValue = 1;
-    }
-
-    delay(60);
+    handleAnalogSticks();
+    handleAnalogButtons();
   }
   else
   {
     play();
+  }
+}
+
+void handleBluetooth()
+{
+  if (bluetooth.available() > 0)
+  {
+    Serial.write("Yes");    // Checks whether data is comming from the serial port
+    cmd = bluetooth.read(); // Reads the data from the serial port
+    handleBluetoothCommand(cmd);
   }
 }
 
@@ -251,6 +182,89 @@ void handleBluetoothCommand(char command)
   default:
     Serial.println("Not move!");
   }
+}
+
+void handleAnalogSticks()
+{
+  analog1X = treatAnalogInputValue(analogRead(analog1XPin), 4);
+  analog1Y = treatAnalogInputValue(analogRead(analog1YPin), 4);
+
+  analog2X = treatAnalogInputValue(analogRead(analog2XPin), 12);
+  analog2Y = treatAnalogInputValue(analogRead(analog2YPin), 4);
+
+  if (analog1X != 0)
+  {
+    servoBase.moveBy(analog1X);
+  }
+
+  if (analog1Y != 0)
+  {
+    servoLeft.moveBy(analog1Y);
+  }
+
+  if (analog2X != 0)
+  {
+    servoGripRotate.moveBy(analog2X);
+  }
+
+  if (analog2Y != 0)
+  {
+    servoRight.moveBy(analog2Y);
+  }
+}
+
+void handleAnalogButtons()
+{
+  analog1SW = digitalRead(analog1SWPin);
+  analog2SW = digitalRead(analog2SWPin);
+
+  // save position
+  if (analog1SW == LOW)
+  {
+    if (analog1SWlastValue == 1)
+    {
+      analog1SWlastValue = 0;
+      if (analog1SWflag == 0)
+      {
+        savePosition();
+        analog1SWflag = 1;
+      }
+      else if (analog1SWflag == 1)
+      {
+        savePosition();
+        analog1SWflag = 0;
+      }
+    }
+  }
+  else
+  {
+    analog1SWlastValue = 1;
+  }
+
+  // grip
+  if (analog2SW == LOW)
+  {
+    if (analog2SWlastValue == 1)
+    {
+      analog2SWlastValue = 0;
+      if (analog2SWflag == 0)
+      {
+        servoGrip.moveTo(50);
+        analog2SWflag = 1;
+      }
+      else if (analog2SWflag == 1)
+      {
+        servoGrip.moveTo(160);
+        analog2SWflag = 0;
+      }
+    }
+  }
+  else
+  {
+    analog2SWlastValue = 1;
+  }
+
+  delay(60);
 }
 
 int treatAnalogInputValue(int data, int speed)
