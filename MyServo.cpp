@@ -18,6 +18,11 @@ void MyServo::init()
   servo.write(this->pos);
 }
 
+int MyServo::getPosition()
+{
+  return this->pos;
+}
+
 void MyServo::moveBy(int value)
 {
   int newValue = constrain(this->pos + value, this->minimum, this->maximum);

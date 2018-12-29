@@ -1,10 +1,18 @@
-// #include <dht.h>
-
 /**
  * Controling of the robotic eezybot arm via bluetooth
  */
 #include "MyServo.h"
+#include "Position.h"
 #include <SoftwareSerial.h>
+
+#define MAX_SAVED_POSITIONS 5
+
+Position positions[MAX_SAVED_POSITIONS] = {
+    Position(0, 0, 0, 0, 0),
+    Position(0, 0, 0, 0, 0),
+    Position(0, 0, 0, 0, 0),
+    Position(0, 0, 0, 0, 0),
+    Position(0, 0, 0, 0, 0)};
 
 #define SP2_RX 2
 #define SP2_TX 3
@@ -65,6 +73,10 @@ int analog2SWflag = 0;
 
 int cmd = 0;
 
+// if palying a sequence or not
+bool playing = false;
+int savedPositions = 0;
+
 void setup()
 {
   // BT module
@@ -86,87 +98,84 @@ void setup()
   digitalWrite(analog2SWPin, HIGH);
 
   Serial.begin(57600);
+
+  // initialize array
+  clearPositions();
 }
 
 void loop()
 {
   //handle bluetooth
   if (bluetooth.available() > 0)
-  {                         // Checks whether data is comming from the serial port
+  {
+    Serial.write("Yes");    // Checks whether data is comming from the serial port
     cmd = bluetooth.read(); // Reads the data from the serial port
     handleCommand(cmd);
   }
-
-  //show sweep
-  // servoBase.sweep();
-  // servoLeft.sweep();
-  // servoRight.sweep();
-  // servoGrip.sweep();
-  // servoGripRotate.sweep();
-
-  // handle analog
-
-  analog1X = treatAnalogInputValue(analogRead(analog1XPin), 4);
-  analog1Y = treatAnalogInputValue(analogRead(analog1YPin), 4);
-  analog1SW = digitalRead(analog1SWPin);
-
-  analog2X = treatAnalogInputValue(analogRead(analog2XPin), 12);
-  analog2Y = treatAnalogInputValue(analogRead(analog2YPin), 4);
-  analog2SW = digitalRead(analog2SWPin);
-
-  Serial.print("Switch:  ");
-  Serial.print(analog2SW);
-  Serial.print("\n");
-  //  Serial.print("X-axis: ");
-  //  Serial.print(analogX);
-  //  Serial.print("\n");
-  //  Serial.print("Y-axis: ");
-  //  Serial.println(analogY);
-  //  Serial.print("\n\n");
-
-  if (analog1X != 0)
+  if (!playing)
   {
-    servoBase.moveBy(analog1X);
-  }
 
-  if (analog1Y != 0)
-  {
-    servoLeft.moveBy(analog1Y);
-  }
+    //show sweep
+    // servoBase.sweep();
+    // servoLeft.sweep();
+    // servoRight.sweep();
+    // servoGrip.sweep();
+    // servoGripRotate.sweep();
 
-  if (analog2X != 0)
-  {
-    servoGripRotate.moveBy(analog2X);
-  }
+    // handle analog
 
-  if (analog2Y != 0)
-  {
-    servoRight.moveBy(analog2Y);
-  }
+    analog1X = treatAnalogInputValue(analogRead(analog1XPin), 4);
+    analog1Y = treatAnalogInputValue(analogRead(analog1YPin), 4);
+    analog1SW = digitalRead(analog1SWPin);
 
-  // grip
-  //If button pressed...
-  if (analog2SW == LOW)
-  {
-    //...ones, turn led on!
-    if (analog2SWflag == 0)
+    analog2X = treatAnalogInputValue(analogRead(analog2XPin), 12);
+    analog2Y = treatAnalogInputValue(analogRead(analog2YPin), 4);
+    analog2SW = digitalRead(analog2SWPin);
+
+    if (analog1X != 0)
     {
-      servoGrip.moveTo(60);
-      analog2SWflag = 1; //change flag variable
+      servoBase.moveBy(analog1X);
     }
-    //...twice, turn led off!
-    else if (analog2SWflag == 1)
-    {
-      servoGrip.moveTo(160);
-      analog2SWflag = 0; //change flag variable again
-    }
-  }
 
-  delay(60);
+    if (analog1Y != 0)
+    {
+      servoLeft.moveBy(analog1Y);
+    }
+
+    if (analog2X != 0)
+    {
+      servoGripRotate.moveBy(analog2X);
+    }
+
+    if (analog2Y != 0)
+    {
+      servoRight.moveBy(analog2Y);
+    }
+
+    // grip
+    if (analog2SW == LOW)
+    {
+      if (analog2SWflag == 0)
+      {
+        servoGrip.moveTo(60);
+        analog2SWflag = 1;
+      }
+      else if (analog2SWflag == 1)
+      {
+        servoGrip.moveTo(160);
+        analog2SWflag = 0;
+      }
+    }
+
+    delay(60);
+  }
 }
 
 void handleCommand(char command)
 {
+  Serial.write("BT command: ");
+  Serial.write(command);
+  Serial.write("\r\n");
   switch (command)
   {
   case 'l':
@@ -199,6 +208,18 @@ void handleCommand(char command)
   case 'e':
     servoGripRotate.moveBy(-5);
     break;
+  case 'p':
+    // play
+    play();
+    break;
+  case 's':
+    //save
+    savePosition();
+    break;
+  case 'i':
+    //stop plaing
+    stop();
+    break;
   default:
     Serial.println("Not move!");
   }
@@ -207,4 +228,46 @@ void handleCommand(char command)
 int treatAnalogInputValue(int data, int speed)
 {
   return map(data, 0, 1024, -speed, speed);
+}
+
+void savePosition()
+{
+  positions[savedPositions] = Position(servoBase.getPosition(),
+                                       servoLeft.getPosition(),
+                                       servoRight.getPosition(),
+                                       servoGrip.getPosition(),
+                                       servoGripRotate.getPosition());
+  savedPositions++;
+}
+
+void play()
+{
+  playing = true;
+  for (int i = 0; i < savedPositions; i++)
+  {
+    Position pos = positions[i];
+    servoBase.moveTo(pos.getBase());
+    servoLeft.moveTo(pos.getLeft());
+    servoRight.moveTo(pos.getRight());
+    servoGrip.moveTo(pos.getGrip());
+    servoGripRotate.moveTo(pos.getGripRotate());
+    Serial.write("Position: ");
+    Serial.write(i);
+    Serial.write("\r\n");
+    delay(1000);
+  }
+}
+
+void stop()
+{
+  playing = false;
+}
+
+void clearPositions()
+{
+  for (int i = 0; i < MAX_SAVED_POSITIONS; i++)
+  {
+    positions[i] = Position(0, 0, 0, 0, 0);
+  }
+  savedPositions = 0;
 }

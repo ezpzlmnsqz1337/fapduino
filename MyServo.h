@@ -20,6 +20,8 @@ public:
 
   void init();
 
+  int getPosition();
+
   void moveBy(int value);
 
   void moveTo(int value);
