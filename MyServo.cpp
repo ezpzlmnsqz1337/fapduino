@@ -32,8 +32,22 @@ void MyServo::moveBy(int value)
 
 void MyServo::moveTo(int value)
 {
+  // if already there, return
+  if (this->pos == value)
+  {
+    return;
+  }
+
+  // get value in between the servo limits
   int newValue = constrain(value, this->minimum, this->maximum);
-  servo.write(newValue);
+
+  // increment with delay to slow down the servo movement
+  int increment = newValue > this->pos ? +1 : -1;
+  while (this->pos != newValue)
+  {
+    this->moveBy(increment);
+    delay(15);
+  }
   this->pos = newValue;
 }
 

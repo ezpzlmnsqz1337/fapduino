@@ -108,10 +108,13 @@ void loop()
 
   if (!playing)
   {
-    // normal workflow
+    // check if we want to start playing by clicking both handleAnalogSticks
+    if (analog1SW)
 
-    // handle analog
-    handleAnalogSticks();
+      // normal workflow
+
+      // handle analog
+      handleAnalogSticks();
     handleAnalogButtons();
   }
   else
@@ -217,6 +220,11 @@ void handleAnalogButtons()
 {
   analog1SW = digitalRead(analog1SWPin);
   analog2SW = digitalRead(analog2SWPin);
+
+  if (analog1SW == LOW && analog2SW == LOW)
+  {
+    play();
+  }
 
   // save position
   if (analog1SW == LOW)
