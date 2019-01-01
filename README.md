@@ -20,6 +20,8 @@ stick 2
  - Y axis: move up and down
  - click: toggle claw open/closed
 
+ - clicking both sticks at the same time starts playing the saved positions sequence
+
  ## Bluetooth
  - l: rotate base left    
  - r: rotate base right    

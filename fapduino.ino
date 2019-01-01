@@ -106,15 +106,14 @@ void loop()
   //handle bluetooth
   handleBluetooth();
 
+  handlePlayOrPause();
+
   if (!playing)
   {
-    // check if we want to start playing by clicking both handleAnalogSticks
-    if (analog1SW)
+    // normal workflow
 
-      // normal workflow
-
-      // handle analog
-      handleAnalogSticks();
+    // handle analog
+    handleAnalogSticks();
     handleAnalogButtons();
   }
   else
@@ -187,6 +186,17 @@ void handleBluetoothCommand(char command)
   }
 }
 
+void handlePlayOrPause()
+{
+  analog1SW = digitalRead(analog1SWPin);
+  analog2SW = digitalRead(analog2SWPin);
+
+  if (!playing && (analog1SW == LOW && analog2SW == LOW))
+  {
+    play();
+  }
+}
+
 void handleAnalogSticks()
 {
   analog1X = treatAnalogInputValue(analogRead(analog1XPin), 4);
@@ -220,11 +230,6 @@ void handleAnalogButtons()
 {
   analog1SW = digitalRead(analog1SWPin);
   analog2SW = digitalRead(analog2SWPin);
-
-  if (analog1SW == LOW && analog2SW == LOW)
-  {
-    play();
-  }
 
   // save position
   if (analog1SW == LOW)
@@ -308,7 +313,7 @@ void play()
     Serial.write("Position: ");
     Serial.write(i);
     Serial.write("\r\n");
-    delay(1000);
+    delay(100);
   }
 }
 
